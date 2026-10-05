@@ -33,6 +33,7 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.config.springProfilesActive | quote }}
+            {{- if ne .Values.config.springProfilesActive "standalone" }}
             - name: DATABASE_URL
               value: {{ .Values.config.databaseUrl | quote }}
             - name: DATABASE_USERNAME
@@ -47,6 +48,7 @@ spec:
                 secretKeyRef:
                   name: interview-lab-db
                   key: password
+            {{- end }}
           # Readiness controls traffic routing; liveness restarts an unhealthy process.
           readinessProbe:
             httpGet:

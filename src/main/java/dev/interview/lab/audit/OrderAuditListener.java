@@ -2,10 +2,12 @@ package dev.interview.lab.audit;
 
 import dev.interview.lab.messaging.OrderCreatedEvent;
 import java.time.Instant;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("!standalone")
 public class OrderAuditListener {
   private final AuditRepository repository;
 

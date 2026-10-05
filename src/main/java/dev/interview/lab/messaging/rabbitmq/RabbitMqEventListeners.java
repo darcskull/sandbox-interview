@@ -8,10 +8,12 @@ import dev.interview.lab.messaging.OrderCreatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /** Consumes RabbitMQ queues and mirrors dashboard messages into MongoDB. */
 @Component
+@Profile("!standalone")
 public class RabbitMqEventListeners {
   private static final Logger log = LoggerFactory.getLogger(RabbitMqEventListeners.class);
   private final DemoMessageRepository demoMessages;

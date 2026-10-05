@@ -7,11 +7,13 @@ import dev.interview.lab.messaging.MessagingConfiguration;
 import dev.interview.lab.messaging.OrderCreatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 /** Consumes the Kafka topics and mirrors dashboard messages into MongoDB. */
 @Component
+@Profile("!standalone")
 public class KafkaEventListeners {
   private static final Logger log = LoggerFactory.getLogger(KafkaEventListeners.class);
   private final DemoMessageRepository demoMessages;

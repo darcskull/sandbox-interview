@@ -30,14 +30,14 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/demo")
 public class DemoDataController {
   private final OrderService orderService;
-  private final AuditRepository auditRepository;
-  private final DemoMessageRepository messageRepository;
+  private final ObjectProvider<AuditRepository> auditRepository;
+  private final ObjectProvider<DemoMessageRepository> messageRepository;
   private final ObjectProvider<DemoMessagePublisher> messagePublisher;
 
   public DemoDataController(
       OrderService orderService,
-      AuditRepository auditRepository,
-      DemoMessageRepository messageRepository,
+      ObjectProvider<AuditRepository> auditRepository,
+      ObjectProvider<DemoMessageRepository> messageRepository,
       ObjectProvider<DemoMessagePublisher> messagePublisher) {
     this.orderService = orderService;
     this.auditRepository = auditRepository;
@@ -57,18 +57,19 @@ public class DemoDataController {
 
   @GetMapping("/mongo")
   public List<?> mongoRecords() {
-    return auditRepository.findAll();
+    return requireAuditRepository().findAll();
   }
 
   @PostMapping("/mongo")
   public Object createMongoRecord(@Valid @RequestBody MongoRecordRequest request) {
-    return auditRepository.save(
-        new AuditDocument(null, request.type(), request.detail(), Instant.now()));
+    return requireAuditRepository()
+        .save(new AuditDocument(null, request.type(), request.detail(), Instant.now()));
   }
 
   @GetMapping("/messages")
   public List<DemoMessageDocument> messages(@RequestParam String channel) {
-    return messageRepository.findTop50ByChannelOrderByPublishedAtDesc(channel.toUpperCase());
+    return requireMessageRepository()
+        .findTop50ByChannelOrderByPublishedAtDesc(channel.toUpperCase());
   }
 
   @PostMapping("/messages")
@@ -91,4 +92,25 @@ public class DemoDataController {
   public record MongoRecordRequest(@NotBlank String type, @NotBlank String detail) {}
 
   public record MessageRequest(@NotBlank String channel, @NotBlank String message) {}
+
+  private AuditRepository requireAuditRepository() {
+    AuditRepository repository = auditRepository.getIfAvailable();
+    if (repository == null) {
+      throw standaloneServiceUnavailable("MongoDB");
+    }
+    return repository;
+  }
+
+  private DemoMessageRepository requireMessageRepository() {
+    DemoMessageRepository repository = messageRepository.getIfAvailable();
+    if (repository == null) {
+      throw standaloneServiceUnavailable("Message brokers");
+    }
+    return repository;
+  }
+
+  private ResponseStatusException standaloneServiceUnavailable(String component) {
+    return new ResponseStatusException(
+        HttpStatus.SERVICE_UNAVAILABLE, component + " are disabled in standalone mode.");
+  }
 }

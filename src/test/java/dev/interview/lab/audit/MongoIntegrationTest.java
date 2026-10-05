@@ -16,8 +16,10 @@ import org.testcontainers.utility.DockerImageName;
 
 /** Verifies Mongo persistence against a disposable MongoDB instance. */
 @SpringBootTest(
-    properties =
-        "spring.datasource.url=jdbc:h2:mem:mongo_integration_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE")
+    properties = {
+      "spring.datasource.url=jdbc:h2:mem:mongo_integration_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE",
+      "spring.autoconfigure.exclude=org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration,org.springframework.boot.amqp.autoconfigure.AmqpAutoConfiguration"
+    })
 @Testcontainers(disabledWithoutDocker = true)
 class MongoIntegrationTest {
   @Container

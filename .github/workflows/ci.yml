@@ -22,8 +22,9 @@ jobs:
           distribution: temurin
           java-version: '27'
           cache: maven
-      - name: Build, test, and check formatting
-        run: mvn --batch-mode clean verify
+      - name: Build, run standalone unit tests, and check formatting
+        # These unit tests use mocks and never start Kafka, RabbitMQ, MongoDB, or Docker.
+        run: mvn --batch-mode clean verify -Dtest=OrderServiceTest,DemoMessagePublisherTest
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -45,8 +46,7 @@ jobs:
         run: |
           docker run --detach --name interview-lab-smoke \
             --publish 8080:8080 \
-            --env SPRING_KAFKA_LISTENER_AUTO_STARTUP=false \
-            --env SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP=false \
+            --env SPRING_PROFILES_ACTIVE=standalone \
             interview-lab:${{ github.sha }}
       - name: Verify the liveness endpoint
         run: |

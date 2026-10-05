@@ -84,7 +84,7 @@ Or from Git Bash:
 ./scripts/stop-project.sh
 ```
 
-Standalone is the default Spring profile and start-script mode. It uses embedded H2 and disables external brokers so the home page and H2 page start without Docker or Podman. MongoDB, Kafka, and RabbitMQ cards are marked unavailable. The `h2` and `postgres` script arguments start PostgreSQL, MongoDB, Kafka, and RabbitMQ using Docker Compose or Podman Compose; `h2` selects the H2 profile while still running the local services. Stop the app with `./scripts/stop-project.sh`; the app log and PID are stored under `.run/`.
+Standalone is the default Spring profile and start-script mode. It uses embedded H2 and excludes MongoDB, Kafka, and RabbitMQ client auto-configuration, so no connections or broker admin retries occur. Framework logs are reduced to warnings while Interview Lab logs remain at info level. The MongoDB, Kafka, and RabbitMQ cards are marked unavailable. The `h2` and `postgres` script arguments start PostgreSQL, MongoDB, Kafka, and RabbitMQ using Docker Compose or Podman Compose; `h2` selects the H2 profile while still running the local services. Stop the app with `./scripts/stop-project.sh`; the app log and PID are stored under `.run/`.
 
 You can also run without Bash from IntelliJ: open `InterviewLabApplication.java` and click the Run icon next to `main`. No active profile is needed; standalone is the default. IntelliJ uses the Java version configured by the imported Maven project (Java 27).
 
@@ -100,9 +100,9 @@ Run all integration tests and the build with:
 mvn --batch-mode clean verify
 ```
 
-The H2 integration test and embedded Kafka broker test run without containers. MongoDB and RabbitMQ use disposable Testcontainers and are skipped automatically when Docker is unavailable. In CI, use a Docker-capable runner to execute all four component integrations.
+The H2 integration test and embedded Kafka broker test run without containers. MongoDB and RabbitMQ use disposable Testcontainers and are skipped automatically when Docker is unavailable. The GitHub and GitLab pipelines intentionally run only the isolated unit tests and launch the Docker smoke-check in standalone mode, so CI does not contact Kafka, RabbitMQ, or MongoDB.
 
-Fast unit tests cover order-service mapping/event publication and routing demo messages to the Kafka or RabbitMQ adapter; they do not need a running database or broker.
+Fast unit tests cover order-service mapping/event publication and routing demo messages to the Kafka or RabbitMQ adapter; they do not need a running database or broker. To run the full local test suite, use `mvn --batch-mode clean verify`; container-based MongoDB and RabbitMQ integration tests run when Docker is available.
 
 ## Dashboard and event flow
 
@@ -134,7 +134,7 @@ docker build -t interview-lab:local .
 
 ## Helm chart
 
-The chart source is under `deploy/helm/interview-lab/`. Comments in each chart file explain its metadata, values, helper templates, Deployment, Service, and release notes. It expects a pre-existing Kubernetes Secret named `interview-lab-db` with `username` and `password` keys and reachable PostgreSQL, Kafka, RabbitMQ, and MongoDB services. Configure those dependencies for a real cluster; the chart demonstrates application deployment patterns rather than provisioning a full production platform.
+The chart source is under `deploy/helm/interview-lab/`. Comments in each chart file explain its metadata, values, helper templates, Deployment, Service, and release notes. Its default values demonstrate PostgreSQL mode and expect a Secret named `interview-lab-db` plus reachable dependent services. The GitLab deploy example explicitly overrides the profile to standalone H2 mode and omits those database environment variables, so it does not connect to MongoDB, Kafka, or RabbitMQ.
 
 ```bash
 helm lint deploy/helm/interview-lab
