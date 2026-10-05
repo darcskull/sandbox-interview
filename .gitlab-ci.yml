@@ -16,9 +16,9 @@ java-tests:
     - apt-get update -qq
     - apt-get install --yes --no-install-recommends maven
   script:
-    # Run only isolated unit tests; this job needs no brokers, MongoDB, or Docker.
+    # Run the standalone H2 controller test; this job needs no brokers, MongoDB, or Docker.
     # `verify` still compiles the project, packages it, and checks Google Java Format.
-    - mvn --batch-mode clean verify -Dtest=OrderServiceTest,DemoMessagePublisherTest
+    - mvn --batch-mode clean verify -Dtest=OrderControllerTest
   artifacts:
     # GitLab can display JUnit test results and keep the packaged JAR for review.
     when: always

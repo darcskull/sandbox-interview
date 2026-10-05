@@ -100,7 +100,7 @@ Run all integration tests and the build with:
 mvn --batch-mode clean verify
 ```
 
-The H2 integration test and embedded Kafka broker test run without containers. MongoDB and RabbitMQ use disposable Testcontainers and are skipped automatically when Docker is unavailable. The GitHub and GitLab pipelines intentionally run only the isolated unit tests and launch the Docker smoke-check in standalone mode, so CI does not contact Kafka, RabbitMQ, or MongoDB.
+The H2 integration test and embedded Kafka broker test run without containers. MongoDB and RabbitMQ use disposable Testcontainers and are skipped automatically when Docker is unavailable. The GitHub and GitLab pipelines intentionally select the standalone H2 controller test and launch the Docker smoke-check in standalone mode, so CI does not contact Kafka, RabbitMQ, or MongoDB.
 
 Fast unit tests cover order-service mapping/event publication and routing demo messages to the Kafka or RabbitMQ adapter; they do not need a running database or broker. To run the full local test suite, use `mvn --batch-mode clean verify`; container-based MongoDB and RabbitMQ integration tests run when Docker is available.
 

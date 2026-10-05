@@ -22,9 +22,9 @@ jobs:
           distribution: temurin
           java-version: '27'
           cache: maven
-      - name: Build, run standalone unit tests, and check formatting
-        # These unit tests use mocks and never start Kafka, RabbitMQ, MongoDB, or Docker.
-        run: mvn --batch-mode clean verify -Dtest=OrderServiceTest,DemoMessagePublisherTest
+      - name: Build, run standalone H2 test, and check formatting
+        # This existing integration test covers the app and H2 without external services.
+        run: mvn --batch-mode clean verify -Dtest=OrderControllerTest
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
