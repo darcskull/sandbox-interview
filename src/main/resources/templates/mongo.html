@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MongoDB · Interview Lab</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <script defer th:src="@{/js/dashboard.js}"></script>
+  </head>
+  <body data-page="mongo">
+    <main class="shell">
+      <nav class="topbar">
+        <a class="brand" th:href="@{/}">← Interview Lab</a>
+        <span class="pill">DOCUMENT · MONGODB</span>
+      </nav>
+      <header class="page-heading">
+        <p class="eyebrow">02 / STORAGE</p>
+        <h1>MongoDB documents</h1>
+        <p>Write a small audit document and browse the documents in the local MongoDB collection.</p>
+      </header>
+      <section class="panel">
+        <div class="panel-title">
+          <div><p class="eyebrow">NEW DOCUMENT</p><h2>Add an audit entry</h2></div>
+          <button class="button secondary" type="button" data-random>Surprise me</button>
+        </div>
+        <form data-form="mongo">
+          <label>Type<input name="type" required maxlength="80" placeholder="NOTE_CREATED" /></label>
+          <label>Detail<textarea name="detail" required maxlength="500" rows="3" placeholder="A short description of this event"></textarea></label>
+          <button class="button" type="submit">Save document</button>
+          <p class="notice" data-notice role="status"></p>
+        </form>
+      </section>
+      <section class="panel">
+        <div class="panel-title">
+          <div><p class="eyebrow">LIVE DATA</p><h2>Audit collection</h2></div>
+          <button class="button secondary" type="button" data-refresh>Refresh</button>
+        </div>
+        <div class="record-list" data-rows></div>
+      </section>
+      <footer><a th:href="@{/}">← Back to all components</a></footer>
+    </main>
+  </body>
+</html>

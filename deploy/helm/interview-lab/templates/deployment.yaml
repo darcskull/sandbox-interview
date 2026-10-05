@@ -1,0 +1,66 @@
+# Deployment manages the desired number of replaceable API pods.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Release-specific resource name and common identifying labels.
+  name: {{ include "interview-lab.fullname" . }}
+  labels: {{- include "interview-lab.labels" . | nindent 4 }}
+spec:
+  # Replica count is configurable through values.yaml or a deployment override.
+  replicas: {{ .Values.replicaCount }}
+  # This selector must match the labels placed on each pod below.
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ include "interview-lab.name" . }}
+  template:
+    metadata:
+      # Pod labels are matched by the selector and selected by the Service.
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ include "interview-lab.name" . }}
+    spec:
+      containers:
+        # The application image and runtime settings for each pod.
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            # Named HTTP port is reused by the Service and health probes.
+            - name: http
+              containerPort: 8080
+          # Environment settings keep deployment-specific values outside the image.
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.config.springProfilesActive | quote }}
+            {{- if ne .Values.config.springProfilesActive "standalone" }}
+            - name: DATABASE_URL
+              value: {{ .Values.config.databaseUrl | quote }}
+            - name: DATABASE_USERNAME
+              # Credentials come from a Kubernetes Secret, not chart values.
+              valueFrom:
+                secretKeyRef:
+                  name: interview-lab-db
+                  key: username
+            - name: DATABASE_PASSWORD
+              # The Secret must exist before the pod can start.
+              valueFrom:
+                secretKeyRef:
+                  name: interview-lab-db
+                  key: password
+            {{- end }}
+          # Readiness controls traffic routing; liveness restarts an unhealthy process.
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          # Requests reserve scheduling capacity; limits cap per-container use.
+          resources: {{- toYaml .Values.resources | nindent 12 }}

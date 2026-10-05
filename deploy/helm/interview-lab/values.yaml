@@ -1,0 +1,32 @@
+# Number of API pods managed by the Deployment.
+replicaCount: 1
+# Container image coordinates; CI overrides repository and tag during deployment.
+image:
+  # Registry/repository containing the application image.
+  repository: interview-lab
+  # Image tag; CI should supply an immutable commit SHA.
+  tag: latest
+  # Pull policy used by Kubernetes when starting a pod.
+  pullPolicy: IfNotPresent
+# Stable network endpoint created by the chart's Service template.
+service:
+  # ClusterIP keeps the service internal to the Kubernetes cluster.
+  type: ClusterIP
+  # Port exposed by the Service and mapped to the app's HTTP port.
+  port: 8080
+# CPU and memory requests/limits for each application container.
+resources:
+  requests:
+    # Minimum scheduling reservation for each pod.
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    # Upper bounds; memory above the limit can cause an OOM kill.
+    cpu: 500m
+    memory: 512Mi
+# Non-secret Spring configuration passed into the Deployment.
+config:
+  # Select the Spring profile that uses the configured PostgreSQL service.
+  springProfilesActive: postgres
+  # JDBC URL for the PostgreSQL service reachable from this namespace.
+  databaseUrl: jdbc:postgresql://postgres:5432/interview_lab

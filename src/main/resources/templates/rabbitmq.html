@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>RabbitMQ · Interview Lab</title><link rel="stylesheet" th:href="@{/css/app.css}" /><script defer th:src="@{/js/dashboard.js}"></script></head>
+  <body data-page="rabbitmq">
+    <main class="shell">
+      <nav class="topbar"><a class="brand" th:href="@{/}">← Interview Lab</a><span class="pill">MESSAGE QUEUE · RABBITMQ</span></nav>
+      <header class="page-heading"><p class="eyebrow">04 / ASYNC MESSAGING</p><h1>RabbitMQ queue</h1><p>Publish to the durable <code>demo.messages</code> queue. The consumer mirrors received messages to MongoDB.</p></header>
+      <section class="panel"><div class="panel-title"><div><p class="eyebrow">PRODUCER</p><h2>Send a message</h2></div><button class="button secondary" type="button" data-random>Surprise me</button></div>
+        <form data-form="rabbitmq"><label>Message<input name="message" required maxlength="500" placeholder="A message for the queue" /></label><button class="button" type="submit">Send to RabbitMQ</button><p class="notice" data-notice role="status"></p></form>
+      </section>
+      <section class="panel"><div class="panel-title"><div><p class="eyebrow">CONSUMER MIRROR · LATEST 50</p><h2>Consumed messages</h2></div><button class="button secondary" type="button" data-refresh>Refresh</button></div><div class="record-list" data-rows></div></section>
+      <footer><a th:href="@{/}">← Back to all components</a></footer>
+    </main>
+  </body>
+</html>

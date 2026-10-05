@@ -1,0 +1,12 @@
+# Helm chart metadata: v2 is the Helm 3 chart format.
+apiVersion: v2
+# Human-readable chart name; release resources use this in their generated names.
+name: interview-lab
+# Short description shown by Helm tooling.
+description: Interview lab API deployment example
+# This chart installs an application, rather than providing shared templates only.
+type: application
+# Chart package version; update when the chart templates or values change.
+version: 0.1.0
+# Informational application version. The image tag is independently set in values.
+appVersion: "0.1.0"
