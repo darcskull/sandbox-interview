@@ -1,0 +1,5 @@
+{{/* Helm prints these post-install instructions after a release succeeds. */}}
+{{/* Wait for the Deployment's pods to pass rollout checks. */}}
+Check rollout: kubectl rollout status deployment/{{ include "interview-lab.fullname" . }}
+{{/* Forward a local port to the in-cluster Service for a quick manual check. */}}
+Port-forward: kubectl port-forward service/{{ include "interview-lab.fullname" . }} 8080:{{ .Values.service.port }}

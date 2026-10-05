@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
+  <changeSet
+    id="002-seed-orders"
+    author="interview-lab"
+    logicalFilePath="db/changelog/db.changelog-master.yaml">
+    <insert tableName="orders">
+      <column name="id" value="10000000-0000-0000-0000-000000000001"/>
+      <column name="customer_name" value="Ada Lovelace"/>
+      <column name="total" valueNumeric="42.50"/>
+      <column name="status" value="CREATED"/>
+      <column name="created_at" value="2026-01-15 10:00:00+00:00"/>
+    </insert>
+    <insert tableName="orders">
+      <column name="id" value="10000000-0000-0000-0000-000000000002"/>
+      <column name="customer_name" value="Grace Hopper"/>
+      <column name="total" valueNumeric="125.00"/>
+      <column name="status" value="PAID"/>
+      <column name="created_at" value="2026-01-16 11:30:00+00:00"/>
+    </insert>
+  </changeSet>
+</databaseChangeLog>

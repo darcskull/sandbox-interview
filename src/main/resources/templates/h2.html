@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>H2 orders · Interview Lab</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <script defer th:src="@{/js/dashboard.js}"></script>
+  </head>
+  <body data-page="h2">
+    <main class="shell">
+      <nav class="topbar">
+        <a class="brand" th:href="@{/}">← Interview Lab</a>
+        <span class="pill">RELATIONAL · H2</span>
+      </nav>
+      <header class="page-heading">
+        <p class="eyebrow">01 / STORAGE</p>
+        <h1>H2 orders</h1>
+        <p>Orders are written to the relational database through Spring Data JPA. Liquibase owns the schema and starter rows.</p>
+      </header>
+      <section class="panel">
+        <div class="panel-title">
+          <div><p class="eyebrow">NEW ROW</p><h2>Create an order</h2></div>
+          <button class="button secondary" type="button" data-random>Surprise me</button>
+        </div>
+        <form data-form="order">
+          <label>Customer name<input name="customerName" required maxlength="120" placeholder="Ada Lovelace" /></label>
+          <label>Total<input name="total" type="number" min="0.01" step="0.01" required placeholder="24.50" /></label>
+          <button class="button" type="submit">Save order</button>
+          <p class="notice" data-notice role="status"></p>
+        </form>
+      </section>
+      <section class="panel">
+        <div class="panel-title">
+          <div><p class="eyebrow">LIVE DATA</p><h2>Orders in H2</h2></div>
+          <button class="button secondary" type="button" data-refresh>Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Customer</th><th>Total</th><th>Status</th><th>Created</th></tr></thead>
+            <tbody data-rows></tbody>
+          </table>
+        </div>
+      </section>
+      <footer><a th:href="@{/}">← Back to all components</a></footer>
+    </main>
+  </body>
+</html>

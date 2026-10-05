@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interview Lab · Data playground</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <p class="eyebrow">JAVA · MESSAGING · STORAGE</p>
+        <h1>Interview Lab</h1>
+        <p class="intro">A small, hands-on playground for seeing data move through familiar backend components.</p>
+      </header>
+      <aside class="standalone-note" th:if="${standalone}">
+        Standalone mode is active: the home page and H2 orders work without Docker. MongoDB, Kafka, and RabbitMQ need their services running.
+      </aside>
+      <section class="cards" aria-label="Data component pages">
+        <a class="card" th:href="@{/h2}"><span class="number">01</span><h2>H2 orders</h2><p>Create and browse relational orders managed by JPA and Liquibase.</p><span class="arrow">Open page →</span></a>
+        <a class="card" th:href="@{/mongo}" th:unless="${standalone}"><span class="number">02</span><h2>MongoDB</h2><p>Write simple audit documents and inspect the collection.</p><span class="arrow">Open page →</span></a>
+        <a class="card" th:href="@{/kafka}" th:unless="${standalone}"><span class="number">03</span><h2>Kafka</h2><p>Publish messages and see them after the Kafka consumer receives them.</p><span class="arrow">Open page →</span></a>
+        <a class="card" th:href="@{/rabbitmq}" th:unless="${standalone}"><span class="number">04</span><h2>RabbitMQ</h2><p>Send queue messages and inspect consumer-confirmed deliveries.</p><span class="arrow">Open page →</span></a>
+        <article class="card unavailable" th:if="${standalone}"><span class="number">02</span><h2>MongoDB</h2><p>Start the local services to use this page.</p><span class="arrow">Unavailable in standalone</span></article>
+        <article class="card unavailable" th:if="${standalone}"><span class="number">03</span><h2>Kafka</h2><p>Start the local services to use this page.</p><span class="arrow">Unavailable in standalone</span></article>
+        <article class="card unavailable" th:if="${standalone}"><span class="number">04</span><h2>RabbitMQ</h2><p>Start the local services to use this page.</p><span class="arrow">Unavailable in standalone</span></article>
+      </section>
+      <footer>Local learning environment · No account or setup inside the app</footer>
+    </main>
+  </body>
+</html>

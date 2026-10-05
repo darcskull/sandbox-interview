@@ -1,0 +1,16 @@
+# This profile keeps the H2-backed application usable without local infrastructure.
+spring:
+  kafka:
+    # Do not create topics or start consumers when Kafka is not installed.
+    admin:
+      auto-create: false
+    listener:
+      auto-startup: false
+  rabbitmq:
+    # Avoid creating RabbitAdmin and attempting queue declarations without a broker.
+    dynamic: false
+    listener:
+      simple:
+        auto-startup: false
+      direct:
+        auto-startup: false

@@ -1,0 +1,6 @@
+target/
+.m2repo/
+.run/
+*.log
+.idea/
+/.idea/

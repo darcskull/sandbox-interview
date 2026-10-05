@@ -1,0 +1,93 @@
+# Example pipeline for GitLab CI. Configure a Docker-capable runner for the
+# DinD job and a protected KUBECONFIG_FILE variable for the deploy job.
+stages:
+  - test
+  - package
+  - deploy
+
+variables:
+  # DinD exposes its daemon to the job container without TLS for this example.
+  # Use a protected runner and follow your GitLab instance's TLS guidance.
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+  IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
+
+java-tests:
+  stage: test
+  image: eclipse-temurin:27-jdk
+  services:
+    # Testcontainers uses this daemon for MongoDB and RabbitMQ integration tests.
+    # The GitLab runner must allow privileged Docker-in-Docker services.
+    - name: docker:27-dind
+      alias: docker
+      command: ["--tls=false"]
+  before_script:
+    # The Temurin image supplies Java 27; install Maven for this job.
+    - apt-get update -qq
+    - apt-get install --yes --no-install-recommends maven
+    - export TESTCONTAINERS_HOST_OVERRIDE=docker
+  script:
+    # `verify` compiles for Java 27, runs the tests, packages the app,
+    # and checks Google Java Format.
+    - mvn --batch-mode clean verify
+  artifacts:
+    # GitLab can display JUnit test results and keep the packaged JAR for review.
+    when: always
+    reports:
+      junit: target/surefire-reports/TEST-*.xml
+    paths:
+      - target/interview-lab-0.1.0-SNAPSHOT.jar
+    expire_in: 1 week
+
+docker-build-verify-push:
+  stage: package
+  image: docker:27-cli
+  services:
+    # Docker-in-Docker gives this job an isolated daemon for image operations.
+    - name: docker:27-dind
+      alias: docker
+      command: ["--tls=false"]
+  needs:
+    - job: java-tests
+      artifacts: false
+  script:
+    # Build the same multi-stage Dockerfile used for local development.
+    - docker info
+    - docker build --pull --tag "$CI_REGISTRY_IMAGE:$IMAGE_TAG" .
+    # Start the service container without broker listeners for a standalone health check.
+    - docker run --detach --name interview-lab-smoke --publish 8080:8080 --env SPRING_KAFKA_LISTENER_AUTO_STARTUP=false --env SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP=false "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+    # A temporary curl container shares the app container's network namespace.
+    - docker run --rm --network container:interview-lab-smoke curlimages/curl:8.12.1 --retry 25 --retry-connrefused --retry-delay 2 --fail http://localhost:8080/actuator/health/liveness
+    # Authenticate with GitLab's per-job registry credentials before pushing.
+    - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password-stdin
+    - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+  after_script:
+    # Remove the temporary container even when a verification step fails.
+    - docker rm --force interview-lab-smoke || true
+  rules:
+    # Publish from the default branch; merge requests still run Java tests.
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+helm-deploy:
+  stage: deploy
+  image: alpine/helm:3.16.4
+  needs:
+    - docker-build-verify-push
+  environment:
+    # GitLab records the deployment under this environment name.
+    name: interview-demo
+  before_script:
+    # Configure this GitLab variable as a protected File-type variable.
+    - test -n "$KUBECONFIG_FILE"
+    - export KUBECONFIG="$KUBECONFIG_FILE"
+    - helm version
+  script:
+    # Validate and render before changing the cluster.
+    - helm lint deploy/helm/interview-lab
+    - helm template interview-lab deploy/helm/interview-lab --set image.repository="$CI_REGISTRY_IMAGE" --set image.tag="$IMAGE_TAG"
+    # Deploy only after setting up the cluster, DB Secret, and dependent services.
+    - helm upgrade --install interview-lab deploy/helm/interview-lab --namespace interview-demo --create-namespace --set image.repository="$CI_REGISTRY_IMAGE" --set image.tag="$IMAGE_TAG" --wait --timeout 3m
+  rules:
+    # Keep cluster changes explicit. Run this job manually from the default branch.
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
